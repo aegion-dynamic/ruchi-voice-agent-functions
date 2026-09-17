@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ruchi — Telugu Cooking Companion</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://rsms.me/" />
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+</head>
+<body>
+  <div class="app">
+
+    <!-- Top bar -->
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        Ruchi <small>Telugu cooking companion · 12 function-calling tools</small>
+      </div>
+      <div class="topbar-actions">
+        <span id="server-pill" class="pill dead">offline</span>
+        <span id="voice-pill" class="pill dead">voice off</span>
+        <button id="reset-btn" class="pill" style="cursor:pointer;border-color:var(--border-strong);background:var(--bg-2);">reset</button>
+      </div>
+    </header>
+
+    <!-- ============================================================
+         Left rail — mode + recipe/intake + live state
+         ============================================================ -->
+    <aside class="rail">
+      <h3>Mode</h3>
+      <div class="mode-toggle">
+        <button id="mode-intake" >📝 Intake</button>
+        <button id="mode-cook" class="active">🍳 Cook</button>
+      </div>
+
+      <h3>Session</h3>
+      <div class="session-card">
+        <span class="label">id</span>
+        <span id="session-id">—</span>
+      </div>
+
+      <h3>Recipe</h3>
+      <div class="recipe-card">
+        <div class="recipe-title">🍛 <span id="recipe-name">Paneer Biryani</span></div>
+        <ol class="steps" id="recipe-steps"></ol>
+      </div>
+
+      <h3>Intake progress</h3>
+      <div class="intake-card" id="intake-card" style="display:none;">
+        <div id="intake-fields"></div>
+      </div>
+
+      <h3>Live state</h3>
+      <div class="state-grid">
+        <div class="state-tile">
+          <div class="k">field</div>
+          <div class="v" id="state-field">—</div>
+        </div>
+        <div class="state-tile accent">
+          <div class="k">step</div>
+          <div class="v" id="state-step">—</div>
+        </div>
+        <div class="state-tile">
+          <div class="k">paused</div>
+          <div class="v" id="state-paused">—</div>
+        </div>
+        <div class="state-tile warm">
+          <div class="k">timer</div>
+          <div class="v" id="state-timer">—</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ============================================================
+         Center stage — voice orb + conversation
+         ============================================================ -->
+    <main class="stage">
+      <div class="stage-header">
+        <div class="orb idle" id="orb" title="Click to talk (browser STT)"></div>
+        <div class="orb-status" id="orb-status">tap to talk</div>
+      </div>
+
+      <div class="transcript" id="transcript">
+        <div class="transcript-empty">
+          <div style="font-size:18px;">నమస్కారం!</div>
+          <div>I'm Ruchi — your Telugu cooking companion.</div>
+          <div class="hint">
+            <b>Tap the orb once</b> to start a hands-free conversation —
+            Ruchi keeps listening after every reply until you tap ⏹ to stop.
+            You can also type a message or use the chips on the right to
+            fire any of the 12 function-calling tools directly.
+          </div>
+        </div>
+      </div>
+
+      <form class="input-bar" id="input-form" autocomplete="off">
+        <button type="button" id="mic-btn" class="icon-btn" title="Voice input (browser STT)">🎤</button>
+        <input id="input-text" type="text" placeholder="say or type something…" />
+        <button type="submit" class="icon-btn primary" title="Send">➤</button>
+      </form>
+    </main>
+
+    <!-- ============================================================
+         Right panel — quick chips + function log
+         ============================================================ -->
+    <section class="side">
+      <div class="side-tabs">
+        <button class="active" data-tab="chips">⚡ Tools</button>
+        <button data-tab="log">📜 Log</button>
+        <button data-tab="transcript">📝 Transcript</button>
+      </div>
+
+      <!-- Quick chips — every one of the 12 tools -->
+      <div class="tab-panel active" data-panel="chips">
+        <div class="chips-panel">
+
+          <!-- INTAKE -->
+          <div class="chips-group" id="group-intake" style="display:none;">
+            <h4>Intake — 2 tools</h4>
+            <div class="chip-row">
+              <input id="intake-field" class="chip-input" placeholder="field (name/time/...)" />
+              <input id="intake-value" class="chip-input" placeholder="value" />
+            </div>
+            <div class="chip-row">
+              <button class="chip tool" data-tool="save_answer">save_answer</button>
+              <button class="chip tool" data-tool="finish_interview">finish_interview</button>
+            </div>
+          </div>
+
+          <!-- COOK — step nav -->
+          <div class="chips-group">
+            <h4>Cook — step navigation</h4>
+            <div class="chip-row">
+              <button class="chip tool" data-tool="next_step">next_step</button>
+              <button class="chip tool" data-tool="previous_step">previous_step</button>
+            </div>
+            <div class="chip-row">
+              <input id="goto-step" class="chip-input" type="number" min="1" placeholder="step #" />
+              <button class="chip tool" data-tool="goto_step">goto_step</button>
+            </div>
+          </div>
+
+          <!-- COOK — timers -->
+          <div class="chips-group">
+            <h4>Cook — timers</h4>
+            <div class="chip-row">
+              <input id="timer-seconds" class="chip-input" type="number" min="1" value="60" />
+              <input id="timer-label" class="chip-input" type="text" value="the rice" />
+            </div>
+            <div class="chip-row">
+              <button class="chip timer" data-tool="start_timer">start_timer</button>
+              <button class="chip warn" data-tool="cancel_timer">cancel_timer</button>
+            </div>
+          </div>
+
+          <!-- COOK — pause / resume -->
+          <div class="chips-group">
+            <h4>Cook — pause / resume</h4>
+            <div class="chip-row">
+              <button class="chip tool" data-tool="pause">pause</button>
+              <button class="chip tool" data-tool="resume">resume</button>
+            </div>
+          </div>
+
+          <!-- COOK — fix my dish -->
+          <div class="chips-group">
+            <h4>Cook — fix my dish</h4>
+            <div class="chip-row">
+              <select id="issue-cat" class="chip-input">
+                <option value="spicy">spicy</option>
+                <option value="salty">salty</option>
+                <option value="watery">watery</option>
+                <option value="burnt">burnt</option>
+                <option value="bland">bland</option>
+                <option value="other">other</option>
+              </select>
+              <input id="issue-details" class="chip-input" placeholder="details" value="too much" />
+            </div>
+            <div class="chip-row">
+              <button class="chip warn" data-tool="report_issue">report_issue</button>
+              <button class="chip tool" data-tool="resolve_issue">resolve_issue</button>
+            </div>
+          </div>
+
+          <!-- COOK — finish -->
+          <div class="chips-group">
+            <h4>Cook — end session</h4>
+            <div class="chip-row">
+              <button class="chip warn" data-tool="finish_cooking">finish_cooking</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Function log -->
+      <div class="tab-panel" data-panel="log">
+        <div class="log" id="log"></div>
+      </div>
+
+      <!-- Conversation transcript (text form, saved to disk) -->
+      <div class="tab-panel" data-panel="transcript">
+        <div class="transcript-panel">
+          <div class="transcript-actions">
+            <button id="transcript-refresh" class="chip tool">↻ Refresh</button>
+            <button id="transcript-clear" class="chip warn">🗑 Clear</button>
+            <span id="transcript-meta" class="muted"></span>
+          </div>
+          <pre id="transcript-text" class="transcript-text">Loading…</pre>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

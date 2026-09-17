@@ -1,0 +1,20 @@
+# Env & secrets — never commit real keys
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# Models (large, downloaded separately — see README)
+models/
+
+# Audio artifacts
+*.pcm
+eleven_test.pcm
